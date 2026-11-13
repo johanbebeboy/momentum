@@ -19,6 +19,12 @@ jobs:
       POWERSHELL_TELEMETRY_OPTOUT: 1
     steps:
     - uses: actions/checkout@v4
+    - name: Install VS 2013 Build Tools
+      run: |
+        choco install visualcpp-build-tools -y --version=12.0.30501.0 --ignore-checksums
+        if ($LastExitCode -ne 0) {
+          choco install vcbuildtools -y --version=12.0.31101.0 --ignore-checksums
+        }
     - name: Generate VS solution
       working-directory: mp\src
       run: |
@@ -27,9 +33,7 @@ jobs:
         gc .\sln_fix.txt | ac .\everything.sln
     - uses: microsoft/setup-msbuild@v2
     - name: Build
-      env:
-        CL: /wd4594
-      run: msbuild mp\src\everything.sln /m /nologo /p:Configuration=Release /p:PlatformToolset=v143 /p:TreatWarningAsError=false /t:"Clean;Build" /v:m
+      run: msbuild mp\src\everything.sln /m /nologo /p:Configuration=Release /t:"Clean;Build" /v:m
     - name: Prepare artifacts
       id: prepare_artifacts
       run: |
